@@ -49,6 +49,10 @@ def analyze(df: pd.DataFrame):
     return df
 
 
+def validation_failure_callback_func():
+    print("Oh no!")
+
+
 @dag(
     start_date=datetime(2023, 1, 1),
     schedule=None,
@@ -77,6 +81,7 @@ def validations_dag():
         data_asset_name=f"{DB_SCHEMA}.{REPORT_TABLE_NAME}",
         expectation_suite_name=GX_SUITE_NAME,
         do_xcom_push=False,
+        validation_failure_callback=validation_failure_callback_func,
     )
 
     transformed_data >> gx_validate

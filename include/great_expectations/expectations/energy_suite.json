@@ -9,7 +9,7 @@
             "expectation_type": "expect_column_min_to_be_between",
             "ge_cloud_id": null,
             "kwargs": {
-                "column": "RENEWABLES_PCT",
+                "column": "renewables_pct",
                 "min_value": 0
             },
             "meta": {}
