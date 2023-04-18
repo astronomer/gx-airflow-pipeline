@@ -24,7 +24,7 @@ COUNTRIES = ["CH", "FR"]
 
 
 @aql.transform
-def transform(in_table, countries):
+def transform_energy(in_table, countries):
     return """
             SELECT 
                 RENEWABLES_CAPACITY/TOTAL_CAPACITY AS RENEWABLES_PCT,
@@ -40,11 +40,18 @@ def analyze(df: pd.DataFrame):
 
     for country in countries:
         country_data = df[df["country"] == country]
-        X = country_data["year"].values.reshape(-1, 1)
-        y_r = country_data["renewables_pct"] * 100
+        country_data_since_2010 = country_data[country_data["year"] >= 2010]
+        X = country_data_since_2010["year"].values.reshape(-1, 1)
+        y_r = country_data_since_2010["renewables_pct"]
         model_r = LinearRegression()
         model_r.fit(X, y_r)
-        task_logger.info(f"{country}: renewables: {round(model_r.coef_[0], 2)}")
+        task_logger.info(
+            "Important note: this is about energy produced, not necessarily energy consumed!"
+        )
+        task_logger.info(
+            f"{country}: renewables Linear regression coefficient: {model_r.coef_[0]}"
+        )
+        task_logger.info(country_data_since_2010)
 
     return df
 
@@ -64,7 +71,7 @@ def validations_dag():
         output_table=Table(conn_id=DB_CONN_ID, metadata=Metadata(schema=DB_SCHEMA)),
     )
 
-    transformed_data = transform(
+    transformed_data = transform_energy(
         extracted_data,
         countries=COUNTRIES,
         output_table=Table(
